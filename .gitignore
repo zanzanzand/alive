@@ -1,0 +1,48 @@
+# tmp folders (any depth)
+tmp/
+**/tmp/
+
+# Python artifacts
+__pycache__/
+*.py[cod]
+*.pyd
+*.pyo
+*.pdb
+.Python
+*.so
+*.egg
+*.egg-info/
+.eggs/
+build/
+dist/
+wheelhouse/
+*.whl
+pip-wheel-metadata/
+*.manifest
+*.spec
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# Test/coverage caches
+.pytest_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# Notebook checkpoints
+.ipynb_checkpoints/
+
+# Local config
+*.env
+
+# .pth files in subdirectories only
+**/*.pth
+!/*.pth
