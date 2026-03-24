@@ -33,6 +33,7 @@ class CatDogDataset(Dataset):
         self.class_names = ["cats", "dogs"]
         self.class_to_idx = {"cats": 0, "dogs": 1}
 
+        #gets the dataset
         self.samples: List[Tuple[Path, int]] = []
         for class_name in self.class_names:
             class_dir = self.root_dir / class_name
@@ -43,7 +44,7 @@ class CatDogDataset(Dataset):
                 self.samples.append((img_path, self.class_to_idx[class_name]))
 
     def __len__(self) -> int:
-        return len(self.samples)
+        return len(self.samples) #returns how many images are appended
 
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, int]:
         img_path, label = self.samples[idx]
@@ -55,7 +56,7 @@ class CatDogDataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        return image, label
+        return image, label # function always returns x, y
 
 
 if __name__ == "__main__":
