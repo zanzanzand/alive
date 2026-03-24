@@ -29,13 +29,18 @@ class DynamicImageDataset(Dataset):
                             "intersection": 19, "island": 20, "lake": 21, "meadow": 22, "medium_residential": 23, "mobile_home_park": 24,
                             "mountain": 25, "overpass": 26, "palace": 27, "parking_lot": 28, "railway": 29, "railway_station": 30, "rectangular_farmland": 31,
                             "river": 32, "roundabout": 33, "runway": 34, "sea_ice": 35, "ship": 36, "snowberg": 37, "sparse_residential": 38, "stadium": 39,
-                            "storage_tank": 40, "tennis_court": 41, "terrace": 42, "thermal_power_station": 43, "wetland": 44}
+                            "storage_tank": 40, "tennis_court": 41, "terrace": 42, "thermal_power_station": 43, "wetland": 44}  
         #TODO 3:
         # Build a list of (image_path, numeric_label) pairs.
         self.samples : List[Tuple[Path, int]] = []
         for class_name in self.class_names:
             class_dir = self.root_dir / class_name
-            img_paths = sorted(class_dir.glob("*.jpg"))
+            img_paths = []
+            # support other image types
+            for suffix in [".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"]:
+                img_paths.extend(class_dir.glob(f"*{suffix}"))
+
+            img_paths = sorted(img_paths)
             for img_path in img_paths:
                 self.samples.append((img_path, self.class_to_idx[class_name]))
 
@@ -54,6 +59,7 @@ class DynamicImageDataset(Dataset):
 
         img_path, label = self.samples[idx]
         image_bgr = cv2.imread(str(img_path))
+        # extension challenge: add error handling when an image cannot be read
         if image_bgr is None:
             raise ValueError(f"Failed to read image: {img_path}")
         image = cv2.cvtColor(image_bgr, cv2.COLOR_BGR2RGB)
@@ -82,6 +88,10 @@ if len(full_dataset) == 0:
     )
 
 print("Total samples:", len(full_dataset))
+print("Class to index mapping:")
+# extension challenge: print the class-to-index mapping
+for k, v in full_dataset.class_to_idx.items():
+    print(k, "->", v)
 print("Classes:", full_dataset.class_names)
 
 # TODO 7:
@@ -120,3 +130,26 @@ for images, labels in train_loader:
     print("Batch image tensor shape:", images.shape)
     print("Batch label tensor shape:", labels.shape)
     break
+
+'''
+1. Why do we need both __len__() and __getitem__() in a custom dataset?
+__len__() tells PyTorch how many samples are in the dataset. It is used to know the dataset size and to manage iteration and batching.
+__getitem__() tells PyTorch how to get one sample using an index. It loads the image and returns the image and its label.
+
+2. Why is it important to keep the train and validation sets separate?
+It is important to separate them since you don't want to validate on the training dataset.
+This helps measure how well the model generalizes instead of memorizing the training data.
+
+3. Why do we usually shuffle only the training dataloader?
+We usually shuffle only the training dataloader to improve learning.
+Shuffling prevents the model from learning patterns based on the order of the data.
+
+4. Why is a random seed useful when using random_split?
+A random seed makes the split reproducible.
+It ensures that every time you run the code, the dataset is divided in the same way into training and validation sets.
+This is useful for debugging and fair comparison of results.
+
+5. What is the difference between a Dataset and a DataLoader?
+A Dataset defines how to access and load individual data samples.
+A DataLoader wraps the Dataset and handles batching and the shuffling.
+'''
