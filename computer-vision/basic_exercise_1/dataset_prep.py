@@ -36,8 +36,6 @@ class DynamicImageDataset(Dataset):
         for class_name in self.class_names:
             class_dir = self.root_dir / class_name
             img_paths = sorted(class_dir.glob("*.jpg"))
-            if self.max_per_class is not None:
-                img_paths = img_paths[: self.max_per_class]
             for img_path in img_paths:
                 self.samples.append((img_path, self.class_to_idx[class_name]))
 
@@ -53,7 +51,7 @@ class DynamicImageDataset(Dataset):
         # 3. Convert BGR to RGB
         # 4. Apply self.transform if it exists
         # 5. Return image, label
-        
+
         img_path, label = self.samples[idx]
         image_bgr = cv2.imread(str(img_path))
         if image_bgr is None:
@@ -63,39 +61,62 @@ class DynamicImageDataset(Dataset):
         if self.transform is not None:
             image = self.transform(image)
 
-        return image, label # function always returns x, y
+        return image, label
         
-    
-    transform = transforms.Compose(
-        [
+data_root = Path(__file__).resolve().parents[1] / "datasets" / "train"  
+
+transform = transforms.Compose(
+    [
         transforms.ToTensor(),
         transforms.Resize((128, 128)),
-        ]
+    ]
+)
+
+# TODO 6:
+# Create the full dataset from the "train" folder.
+full_dataset = DynamicImageDataset(data_root, transform=transform)
+print(f"Full dataset size: {len(full_dataset)}")
+if len(full_dataset) == 0:
+    raise ValueError(
+        f"No images found. Expected .jpg files under: {data_root}"
     )
-    # TODO 6:
-    # Create the full dataset from the "train" folder.
-    full_dataset = None
-    print("Total samples:", len(full_dataset))
-    4
-    print("Classes:", full_dataset.class_names)
-    # TODO 7:
-    # Compute the train and validation sizes for an 80/20 split.
-    train_size = None
-    val_size = None
-    # TODO 8:
-    # Use a seeded generator and random_split to create train_subset and val_subset.
-    generator = None
-    train_subset = None
-    val_subset = None
-    # TODO 9:
-    # Create a DataLoader for the training subset.
-    train_loader = None
-    # TODO 10:
-    # Create a DataLoader for the validation subset.
-    val_loader = None
-    # TODO 11:
-    # Test one batch from the train loader and print its shapes.
-    for images, labels in train_loader:
-        print("Batch image tensor shape:", images.shape)
-        print("Batch label tensor shape:", labels.shape)
-        break
+
+print("Total samples:", len(full_dataset))
+print("Classes:", full_dataset.class_names)
+
+# TODO 7:
+# Compute the train and validation sizes for an 80/20 split.
+train_size = int(0.8 * len(full_dataset))
+val_size = len(full_dataset) - train_size
+
+# TODO 8:
+# Use a seeded generator and random_split to create train_subset and val_subset.
+generator = torch.Generator().manual_seed(RANDOM_SEED)
+train_dataset, val_dataset = random_split(
+        full_dataset, [train_size, val_size], generator=generator
+    )
+
+# TODO 9:
+# Create a DataLoader for the training subset.
+train_loader = DataLoader(
+        train_dataset,
+        batch_size=8,
+        shuffle=True,
+        num_workers=0,
+    )
+
+# TODO 10:
+# Create a DataLoader for the validation subset.
+val_loader = DataLoader(
+        val_dataset,
+        batch_size=8,
+        shuffle=False,
+        num_workers=0,
+    )
+
+# TODO 11:
+# Test one batch from the train loader and print its shapes.
+for images, labels in train_loader:
+    print("Batch image tensor shape:", images.shape)
+    print("Batch label tensor shape:", labels.shape)
+    break
