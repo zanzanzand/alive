@@ -14,7 +14,7 @@ class DynamicImageDataset(Dataset):
         self.transform = transform
         #TODO 1:
         # Find all class folder names and store them in sorted order.
-        self.class_names = ["airplane", "airport", "baseball_diamond", "basketaball_court", "beach", "bridge",
+        self.class_names = ["airplane", "airport", "baseball_diamond", "basketball_court", "beach", "bridge",
                             "chaparral", "church", "circular_farmland","cloud", "commercial_area", "dense_residential",
                             "desert", "forest", "freeway", "golf_course", "ground_track_field", "harbor", "industrial_area",
                             "intersection", "island", "lake", "meadow", "medium_residential", "mobile_home_park",
@@ -23,7 +23,7 @@ class DynamicImageDataset(Dataset):
                             "storage_tank", "tennis_court", "terrace", "thermal_power_station", "wetland"]
         #TODO 2:
         # Build a dictionary like {"airplane": 0, "airport": 1, ...}
-        self.class_to_idx =  {"airplane": 0 , "airport": 1, "baseball_diamond": 2, "basketaball_court": 3, "beach": 4, "bridge": 5,
+        self.class_to_idx =  {"airplane": 0 , "airport": 1, "baseball_diamond": 2, "basketball_court": 3, "beach": 4, "bridge": 5,
                             "chaparral": 6, "church": 7, "circular_farmland": 8, "cloud": 9, "commercial_area": 10, "dense_residential": 11,
                             "desert": 12, "forest": 13, "freeway": 14, "golf_course": 15, "ground_track_field": 16, "harbor": 17, "industrial_area": 18,
                             "intersection": 19, "island": 20, "lake": 21, "meadow": 22, "medium_residential": 23, "mobile_home_park": 24,
@@ -35,10 +35,11 @@ class DynamicImageDataset(Dataset):
         self.samples : List[Tuple[Path, int]] = []
         for class_name in self.class_names:
             class_dir = self.root_dir / class_name
-            img_paths = []
+
             # support other image types
-            for suffix in [".jpg", ".jpeg", ".png", ".bmp", ".tif", ".tiff"]:
-                img_paths.extend(class_dir.glob(f"*{suffix}"))
+            img_paths = sorted(
+                [p for p in class_dir.iterdir() if p.suffix.lower() in IMAGE_SUFFIXES]
+            )
 
             img_paths = sorted(img_paths)
             for img_path in img_paths:
