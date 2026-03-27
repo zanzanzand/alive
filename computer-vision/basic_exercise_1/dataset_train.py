@@ -197,7 +197,6 @@ def train_model(model, train_loader, val_loader, device, epochs, learning_rate):
 # TODO 14:
 # Select the device.
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-print(device)
 
 # TODO 15:
 # Create the model and move it to the device.
@@ -224,3 +223,28 @@ torch.save(
     },
 "simple_cnn_model.pth",
 )
+
+'''
+REFLECTION QS
+1. Why do we call model.train() during training and model.eval() during validation?
+These two modes tell the model whether it is being used for learning or for checking performance.
+In training mode, the model is allowed to update its behavior as it learns from data.
+In evaluation mode, the model is treated as fixed so that its outputs remain stable and consistent for testing.
+
+2. Why must we call optimizer.zero_grad() before backpropagation?
+Gradients are stored and added across steps unless they are manually reset.
+Clearing them before each update ensures that the computation of gradients starts fresh for every batch.
+
+3. What does CrossEntropyLoss expect as model output and label format?
+CrossEntropyLoss expects the model to output a list of raw scores for each class.
+The expected label is a single number that represents the correct class. 
+The loss function then compares these scores against the correct class.
+
+4. Why do we use torch.no_grad() during validation?
+This disables the tracking of operations needed for gradient computation.
+Since validation only measures performance and does not involve learning, this reduces unnecessary computation and saves memory.
+
+5. Why is it useful to save metadata such as class_names together with model_state_dict()?
+Saving this information allows the model to be used properly after it is reloaded.
+The weights alone do not indicate what each output corresponds to, so the saved metadata provides the necessary context to interpret predictions correctly.
+'''
